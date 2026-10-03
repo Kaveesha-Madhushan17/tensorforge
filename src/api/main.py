@@ -19,7 +19,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from . import config
 from .errors import ApiError, error_response
 from .jobs import JobStore, QueueFull, Worker, status_body
-from .model import Predictor
+from src.model.predictor import Predictor
 from .validation import validate_many, validate_single
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")

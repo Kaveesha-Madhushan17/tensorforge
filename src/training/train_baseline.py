@@ -1,9 +1,9 @@
 """Baseline v0: char + word TF-IDF with three logistic regression heads.
 
 1. Fit on train, tune thresholds and temperature on validation, report metrics.
-2. Refit on train + validation with the tuned settings and save artifacts/model.joblib.
+2. Refit on train + validation with the tuned settings and save models/model.joblib.
 
-Run from repo root:  python training/train_baseline.py
+Run from repo root:  python -m src.training.train_baseline
 """
 import json
 import sys
@@ -18,17 +18,17 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 from sklearn.pipeline import make_union
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(ROOT))
-from app.labels import CATEGORIES, NO_SECONDARY  # noqa: E402
-from app.textprep import model_input  # noqa: E402
+from src.model.labels import CATEGORIES, NO_SECONDARY  # noqa: E402
+from src.model.textprep import model_input  # noqa: E402
 
 VERSION = "tfidf-lr-0.1"
 SEED = 42
 
 
 def load(name):
-    d = pd.read_csv(ROOT / "data" / f"{name}.csv", keep_default_na=False, dtype=str)
+    d = pd.read_csv(ROOT / "data" / "raw" / f"{name}.csv", keep_default_na=False, dtype=str)
     d["sec"] = d.secondary_category.replace("", NO_SECONDARY)
     d["urgent"] = d.is_urgent.str.lower() == "true"
     d["x"] = [model_input(c, s, t) for c, s, t in zip(d.channel, d.subject, d.text)]
@@ -75,7 +75,7 @@ def ece(conf, correct, bins=10):
 
 
 def main():
-    from app.model import Predictor  # reuse the exact serving postprocess
+    from src.model.predictor import Predictor  # reuse the exact serving postprocess
 
     tr, va = load("train"), load("validation")
     allowed = sorted({(c, s) for c, s in zip(tr.category, tr.sec) if s != NO_SECONDARY}
@@ -133,9 +133,9 @@ def main():
     art = {**base, **mf, "sec_threshold": sec_t, "urgent_threshold": urg_t,
            "cat_classes": list(mf["cat_clf"].classes_), "sec_classes": list(mf["sec_clf"].classes_)}
     assert art["cat_classes"] == sorted(CATEGORIES)
-    out = ROOT / "artifacts" / "model.joblib"
+    out = ROOT / "models" / "model.joblib"
     joblib.dump(art, out, compress=3)
-    (ROOT / "artifacts" / "metrics.json").write_text(json.dumps(metrics, indent=2))
+    (ROOT / "models" / "metrics.json").write_text(json.dumps(metrics, indent=2))
     print("saved", out, "->", Predictor(out).version)
 
 

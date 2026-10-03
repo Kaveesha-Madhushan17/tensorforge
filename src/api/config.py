@@ -1,9 +1,9 @@
 import os
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-MODEL_PATH = Path(os.environ.get("MODEL_PATH", BASE_DIR / "artifacts" / "model.joblib"))
+MODEL_PATH = Path(os.environ.get("MODEL_PATH", BASE_DIR / "models" / "model.joblib"))
 DATA_DIR = Path(os.environ.get("DATA_DIR", BASE_DIR / "runtime"))
 JOB_DB_PATH = Path(os.environ.get("JOB_DB_PATH", DATA_DIR / "jobs.sqlite3"))
 

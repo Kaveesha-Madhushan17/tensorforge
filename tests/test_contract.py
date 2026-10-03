@@ -1,4 +1,4 @@
-"""Contract tests. Every response body is validated against the official JSON Schemas in schemas/.
+"""Contract tests. Every response body is validated against the official JSON Schemas in api_spec/schemas/.
 
 Run:  pytest -q
 """
@@ -17,7 +17,7 @@ H = {"X-API-Key": KEY, "Content-Type": "application/json"}
 
 
 def schema(name):
-    return Draft202012Validator(json.loads((ROOT / "schemas" / f"{name}.schema.json").read_text()))
+    return Draft202012Validator(json.loads((ROOT / "api_spec" / "schemas" / f"{name}.schema.json").read_text()))
 
 
 SCHEMAS = {n: schema(n) for n in ["predict_response", "batch_response", "batch_job_status",
@@ -40,9 +40,9 @@ def client(tmp_path_factory):
     os.environ["API_KEY"] = KEY
     os.environ["JOB_DB_PATH"] = str(tmp_path_factory.mktemp("db") / "jobs.sqlite3")
     import importlib
-    from app import config
+    from src.api import config
     importlib.reload(config)
-    from app import main
+    from src.api import main
     importlib.reload(main)
     from fastapi.testclient import TestClient
     with TestClient(main.app) as c:
