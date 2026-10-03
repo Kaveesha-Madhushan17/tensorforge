@@ -2,7 +2,7 @@
 import re
 
 from . import config
-from .labels import CHANNELS
+from src.model.labels import CHANNELS
 
 _NON_WS = re.compile(r"\S")
 

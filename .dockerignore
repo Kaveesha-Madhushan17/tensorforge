@@ -1,8 +1,12 @@
 .git
+.env
 data/
 tests/
-training/
+src/training/
+notebooks/
+docs/
 runtime/
 **/__pycache__
 *.pyc
 .pytest_cache
+.ipynb_checkpoints

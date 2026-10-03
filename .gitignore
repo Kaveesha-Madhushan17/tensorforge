@@ -1,8 +1,19 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+.ipynb_checkpoints/
 runtime/
-.env
-data/*.csv
-data/*.jsonl
 .venv/
+
+# secrets: never commit the real API key
+.env
+
+# organiser data (kept out of git; put the files in data/raw/ locally)
+data/raw/*.csv
+data/raw/*.jsonl
+
+# large model files (transformers) live outside git; the small baseline joblib is committed
+models/**/*.safetensors
+models/**/*.bin
+models/**/*.onnx
+models/**/*.pt

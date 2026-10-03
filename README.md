@@ -2,7 +2,7 @@
 
 Classifies RideEat support tickets (English, Sinhala, Tamil, Singlish, Tanglish, mixed) into a primary
 category, an optional secondary category and an urgency flag, and routes them to a team.
-The service follows `tensorforge-phase2-openapi-v2.yaml` exactly.
+The service follows `api_spec/tensorforge-phase2-openapi-v2.yaml` exactly.
 
 ## Run with Docker
 
@@ -13,53 +13,75 @@ docker run -p 8000:8000 -e API_KEY=<key> tensorforge
 
 No internet is needed at runtime. The model is baked into the image.
 
-## Run locally (Windows PowerShell)
+## Run locally
+
+Linux / macOS:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+export API_KEY=dev-key
+uvicorn src.api.main:app --port 8000
+```
+
+Windows PowerShell:
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -r requirements-dev.txt
 $env:API_KEY = "dev-key"
-uvicorn app.main:app --port 8000
+uvicorn src.api.main:app --port 8000
 ```
+
+Copy `.env.example` to `.env` for your own key. `.env` is git-ignored; never commit the real key.
 
 ## Test
 
-```powershell
+```bash
 pytest -q
 ```
 
-52 contract tests. Every response is validated against the official JSON Schemas in `schemas/`.
+52 contract tests. Every response is validated against the official JSON Schemas in `api_spec/schemas/`.
 They cover auth order, 400/401/404/405/409/410/413/415/422/429 paths, batch ordering and
 atomic validation, async jobs (paging, idempotency, queue limit, expiry, restart recovery) and
 determinism between `/predict`, `/predict/batch` and jobs.
 
 ## Train
 
-Put `train.csv` and `validation.csv` from the organisers in `data/` (not committed), then:
+Put `train.csv` and `validation.csv` from the organisers in `data/raw/` (not committed), then from the repo root:
 
-```powershell
-python training/train_baseline.py
+```bash
+python -m src.training.train_baseline
 ```
 
-This writes `artifacts/model.joblib` and `artifacts/metrics.json`.
+This writes `models/model.joblib` and `models/metrics.json`.
 
 ## Layout
 
 | Path | What it does |
 |---|---|
-| `app/main.py` | Routes and the check order: auth, content type, size, JSON, validation |
-| `app/validation.py` | Field-level validation with `index` for batch items |
-| `app/model.py` | Model backends and the rules layer (team map, spam rules, secondary != primary) |
-| `app/jobs.py` | SQLite job store and background worker |
-| `app/textprep.py` | Text preparation shared by training and serving |
-| `training/` | Training scripts |
-| `artifacts/` | Versioned model files |
+| `src/api/main.py` | Routes and the check order: auth, content type, size, JSON, validation |
+| `src/api/validation.py` | Field-level validation with `index` for batch items |
+| `src/api/jobs.py` | SQLite job store and background worker |
+| `src/api/config.py` | Paths, limits and settings (env-overridable) |
+| `src/model/predictor.py` | Model backends and the rules layer (team map, spam rules, secondary != primary) |
+| `src/model/labels.py` | Fixed categories and the category -> team table |
+| `src/model/textprep.py` | Text preparation shared by training and serving |
+| `src/training/` | Training scripts |
+| `models/` | Versioned model files |
+| `notebooks/` | Data exploration and experiments |
+| `api_spec/` | Organiser OpenAPI contract and JSON Schemas (do not edit) |
+| `data/` | `DATA_NOTES.md`; organiser CSVs go in `data/raw/` |
+| `frontend/` | Demo site |
+| `docs/` | Report and diagrams |
+| `tests/` | Contract tests |
 
 ## Model version
 
 `model_version` is `<tag>+<first 8 hex of the artifact's SHA-256>`, so it always points at an exact
-file in `artifacts/`. It is identical across `/health`, `/predict`, `/predict/batch` and jobs.
+file in `models/`. It is identical across `/health`, `/predict`, `/predict/batch` and jobs.
 
 ## needs_human_review
 
@@ -82,4 +104,4 @@ hosted server so jobs survive restarts. A job that was running when the service 
 ## Current model
 
 Baseline `tfidf-lr-0.1` (char + word TF-IDF, three logistic regression heads). Placeholder until the
-multilingual transformer is trained. See `artifacts/metrics.json`.
+multilingual transformer is trained. See `models/metrics.json`.
