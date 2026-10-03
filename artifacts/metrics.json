@@ -1,0 +1,23 @@
+{
+  "model_version_tag": "tfidf-lr-0.1",
+  "validation": {
+    "category_macro_f1": 0.6394,
+    "category_accuracy": 0.6112,
+    "secondary_macro_f1": 0.6373,
+    "urgent_f1": 0.8904,
+    "category_ece": 0.0538,
+    "accuracy_by_language": {
+      "en": 0.5286,
+      "mixed": 0.45,
+      "si": 0.4125,
+      "singlish": 0.885,
+      "ta": 0.6333,
+      "tanglish": 0.65
+    }
+  },
+  "tuned": {
+    "sec_threshold": 0.2,
+    "urgent_threshold": 0.5499999999999999,
+    "temperature": 0.5432
+  }
+}

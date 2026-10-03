@@ -1,0 +1,7 @@
+fastapi==0.142.2
+starlette==1.7.0
+uvicorn==0.54.0
+numpy==2.4.4
+scipy==1.17.1
+scikit-learn==1.5.2
+joblib==1.5.3
